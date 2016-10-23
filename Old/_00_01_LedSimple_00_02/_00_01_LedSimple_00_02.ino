@@ -39,53 +39,81 @@
 
 #define NS_TO_CYCLES(n) ( (n) / NS_PER_CYCLE )
 
-// For testing purposes only
-int starInsert = 0;
 
-// Shooting star variables
-/*
-int starNumber = how many stars are currently running
-int myStarz[] = the relative position of each star to the one before it
-*/
-#define STAR_MAX_NUMBER 10
 
-int starNumber = 0;
-int myStarz[STAR_MAX_NUMBER];
-byte myStarzR[STAR_MAX_NUMBER];
-byte myStarzG[STAR_MAX_NUMBER];
-byte myStarzB[STAR_MAX_NUMBER];
+
+
 
 // Theatre-style crawling lights.
 // Changes spacing to be dynmaic based on string size
 
 #define THEATER_SPACING (PIXELS/20)
 
+void myTest()
 
-void shootingStar(unsigned char wait ) {
+{
   
   
-      
-      
-      unsigned int myCounter=0;
+      int myThoughts[2] = {10,40}; 
       unsigned int step=0;
+      cli();
+      
+      for (int i=0; i < PIXELS ; i++) {
+        
+        if (step > myThoughts[0]-4 && step<=myThoughts[0] ) {
+          
+         // sendPixel( 100/(myThoughts[0]-step+1) , 10/(myThoughts[0]-step+1) , 100/(myThoughts[0]-step+1) );
+          sendPixel( 10 , 10 , 10 );
+        } 
+        
+        
+        
+        else {
+          
+          sendPixel( 0 , 0 , 0 );
+          
+        }
+        
+        step++;
+        
+        if (step==THEATER_SPACING) step =0;
+        
+      }
+      
+      sei();
+      
+      show();
+      delay(1000);
+
+}
+void theaterChase( unsigned char r , unsigned char g, unsigned char b, unsigned char wait ) {
+  
+  for (int j=0; j< 3 ; j++) {  
+  
+    for (int q=0; q < THEATER_SPACING ; q++) {
+      
+      unsigned int step=0;
+      
+      
+      
       cli();
       
       
       for (int i=0; i < PIXELS ; i++) {
         
-        
-        if (step==myStarz[myCounter] && myCounter < STAR_MAX_NUMBER) {
+        if (step==q) {
           
-          sendPixel( myStarzR[myCounter] , myStarzG[myCounter] , myStarzB[myCounter] );
-          myCounter++;
-          step=0;
-          } 
-        else {
-          step++;
+          sendPixel( r , g , b );
+          
+        } else {
+          
           sendPixel( 0 , 0 , 0 );
           
         }
-       
+        
+        step++;
+        
+        if (step==THEATER_SPACING) step =0;
         
       }
       
@@ -93,71 +121,29 @@ void shootingStar(unsigned char wait ) {
       
       show();
       delay(wait);
-      //Serial.println(myCounter);
-      myStarz[0]++;
-      //delay(wait);
-      //starIncrement();
-     
+      
+    }
     
-    
-  
+  }
   
 }
-void newStar()
-{
-  Serial.println("New Star");
-for (int i = STAR_MAX_NUMBER-1; i >0;i--)
-  {
-  myStarz[i] = myStarz[i-1];
-  myStarzR[i] = myStarzR[i-1];
-  myStarzG[i] = myStarzG[i-1];
-  myStarzB[i] = myStarzB[i-1];
-  //Serial.println(myStarz[i-1]);
-  }
-  myStarz[0]=0;
-  myStarzR[0] = random(0,120);
-  myStarzG[0] = random(0,120);
-  myStarzB[0] = random(0,120);
-    
-  }
 
 void setup() {
     
   ledsetup();
   Serial.begin(9600);
-  for (int i = 0; i <STAR_MAX_NUMBER;i++)
-  {
-  myStarz[i] = 2;
-  myStarzR[i] = 0;
-  myStarzG[i] = 0;
-  myStarzB[i] = 0;
-  }
-  myStarzR[0] = 10;
-  myStarzG[1] = 10;
-  myStarzB[2] = 10;
+
   
 }
 
 
-
 void loop() {
  
-  //Serial.println("Call 1");
-//  myTest();
-//  theaterChase(127, 127, 127, 10); // White
-//   Serial.println("Call 2");
-  shootingStar(10); // Red
-starInsert++;
-Serial.print("*");
-//Serial.print(starInsert);
-if (starInsert>30)
-{
-  //Serial.println();
-  starInsert = 0;
-
-newStar();
-}
-
+  Serial.println("Call 1");
+  myTest();
+  theaterChase(127, 127, 127, 10); // White
+   Serial.println("Call 2");
+  theaterChase(127,   0,   0, 10); // Red
 
 return;
   

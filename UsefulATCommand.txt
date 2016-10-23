@@ -1,0 +1,42 @@
+Demander numero de SIM
+AT+CNUM=?
+
+
+
+
+Activer retour verbose
+AT+CMEE=2
+
+Activer mode texte sim
+AT+CMGF=1
+
+Statut reseau
+AT+CREG
+
+Qualite reseau
+AT+CSQ
+
+Choisir un reseau
+AT+COPS
+
+Choisir mode modem
+AT+CFUN
+
+Mode de signalement de nouveau SMS
+AT+CNMI
+
+
+A TESTER
+Choisir mode envoi SMS
+AT+CSMP
+
+Espace de stockahe des SMS
+AT+CPMS
+
+Interroger mode d'effacements possibles
+AT+CMGD=?
+Delete all messages
+AT+CMGD=X,4
+
+
+

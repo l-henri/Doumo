@@ -47,13 +47,8 @@ int starInsert = 0;
 int starNumber = how many stars are currently running
 int myStarz[] = the relative position of each star to the one before it
 */
-#define STAR_MAX_NUMBER 10
-
 int starNumber = 0;
-int myStarz[STAR_MAX_NUMBER];
-byte myStarzR[STAR_MAX_NUMBER];
-byte myStarzG[STAR_MAX_NUMBER];
-byte myStarzB[STAR_MAX_NUMBER];
+int myStarz[] = {0,0,0,0,0};
 
 // Theatre-style crawling lights.
 // Changes spacing to be dynmaic based on string size
@@ -61,7 +56,7 @@ byte myStarzB[STAR_MAX_NUMBER];
 #define THEATER_SPACING (PIXELS/20)
 
 
-void shootingStar(unsigned char wait ) {
+void shootingStar( unsigned char r , unsigned char g, unsigned char b, unsigned char wait ) {
   
   
       
@@ -74,9 +69,9 @@ void shootingStar(unsigned char wait ) {
       for (int i=0; i < PIXELS ; i++) {
         
         
-        if (step==myStarz[myCounter] && myCounter < STAR_MAX_NUMBER) {
+        if (step==myStarz[myCounter]) {
           
-          sendPixel( myStarzR[myCounter] , myStarzG[myCounter] , myStarzB[myCounter] );
+          sendPixel( r , g , b );
           myCounter++;
           step=0;
           } 
@@ -93,67 +88,81 @@ void shootingStar(unsigned char wait ) {
       
       show();
       delay(wait);
-      //Serial.println(myCounter);
-      myStarz[0]++;
       //delay(wait);
-      //starIncrement();
+      starIncrement();
      
     
     
   
   
 }
-void newStar()
-{
-  Serial.println("New Star");
-for (int i = STAR_MAX_NUMBER-1; i >0;i--)
-  {
-  myStarz[i] = myStarz[i-1];
-  myStarzR[i] = myStarzR[i-1];
-  myStarzG[i] = myStarzG[i-1];
-  myStarzB[i] = myStarzB[i-1];
-  //Serial.println(myStarz[i-1]);
-  }
-  myStarz[0]=0;
-  myStarzR[0] = random(0,120);
-  myStarzG[0] = random(0,120);
-  myStarzB[0] = random(0,120);
-    
-  }
 
 void setup() {
     
   ledsetup();
   Serial.begin(9600);
-  for (int i = 0; i <STAR_MAX_NUMBER;i++)
-  {
-  myStarz[i] = 2;
-  myStarzR[i] = 0;
-  myStarzG[i] = 0;
-  myStarzB[i] = 0;
-  }
-  myStarzR[0] = 10;
-  myStarzG[1] = 10;
-  myStarzB[2] = 10;
+
   
 }
 
+void newStar()
+{
+  Serial.println("New Star");
+  starNumber++;
+int i= starNumber;
+while (i>0)
+  {
+    i--;
+    if(i == 5)
+    {
+    }
+    else if (i==0)
+    {
+    myStarz[i] =  1;
+    }
+    else
+    {
+    myStarz[i+1] =  myStarz[i];
+    }
+    
+    }
+    
+  }
 
 
+
+
+
+
+
+void starIncrement()
+{
+  
+for (int i= 0; i<5; i++)
+  {
+    if (myStarz[i] > 0)
+    {
+  myStarz[i] = myStarz[i] +1;
+  
+  if (myStarz[i] > PIXELS)
+  {myStarz[i] = 0;}
+  }
+  Serial.print(myStarz[i]);
+  }
+  Serial.println();
+}
 void loop() {
  
   //Serial.println("Call 1");
 //  myTest();
 //  theaterChase(127, 127, 127, 10); // White
 //   Serial.println("Call 2");
-  shootingStar(10); // Red
+  shootingStar(127,   0,   0, 10); // Red
 starInsert++;
-Serial.print("*");
 //Serial.print(starInsert);
-if (starInsert>30)
-{
-  //Serial.println();
-  starInsert = 0;
+if (starInsert>61)
+{starInsert = 0;
+
 
 newStar();
 }
