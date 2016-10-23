@@ -48,6 +48,7 @@ int starNumber = how many stars are currently running
 int myStarz[] = the relative position of each star to the one before it
 */
 #define STAR_MAX_NUMBER 10
+unsigned long time;
 
 int starNumber = 0;
 int myStarz[STAR_MAX_NUMBER];
@@ -61,7 +62,7 @@ byte myStarzB[STAR_MAX_NUMBER];
 #define THEATER_SPACING (PIXELS/20)
 
 
-void shootingStar(unsigned char wait ) {
+void shootingStar() {
   
   
       
@@ -92,7 +93,6 @@ void shootingStar(unsigned char wait ) {
       sei();
       
       show();
-      delay(wait);
       //Serial.println(myCounter);
       myStarz[0]++;
       //delay(wait);
@@ -146,8 +146,13 @@ void loop() {
 //  myTest();
 //  theaterChase(127, 127, 127, 10); // White
 //   Serial.println("Call 2");
-  shootingStar(10); // Red
+  
+if (millis() - time > 10)
+{shootingStar(); 
+time = millis();
 starInsert++;
+}
+
 Serial.print("*");
 //Serial.print(starInsert);
 if (starInsert>30)
