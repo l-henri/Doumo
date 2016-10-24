@@ -50,6 +50,8 @@ int myStarz[] = the relative position of each star to the one before it
 #define STAR_MAX_NUMBER 10
 unsigned long time;
 
+bool isAnimating = false;
+
 int starNumber = 0;
 int myStarz[STAR_MAX_NUMBER];
 byte myStarzR[STAR_MAX_NUMBER];
@@ -98,13 +100,18 @@ void shootingStar() {
       //delay(wait);
       //starIncrement();
      
-    
+    if (myCounter == 0)
+      {
+        Serial.println("Stop Animation");
+      isAnimating = false;
+      }
     
   
   
 }
 void newStar()
 {
+  isAnimating = true;
   Serial.println("New Star");
 for (int i = STAR_MAX_NUMBER-1; i >0;i--)
   {
@@ -122,7 +129,7 @@ for (int i = STAR_MAX_NUMBER-1; i >0;i--)
   }
 
 void setup() {
-    
+    isAnimating = true;
   ledsetup();
   Serial.begin(9600);
   for (int i = 0; i <STAR_MAX_NUMBER;i++)
@@ -147,17 +154,17 @@ void loop() {
 //  theaterChase(127, 127, 127, 10); // White
 //   Serial.println("Call 2");
   
-if (millis() - time > 10)
+if (millis() - time > 10 && isAnimating)
 {shootingStar(); 
 time = millis();
 starInsert++;
 }
 
-Serial.print("*");
+//Serial.print("*");
 //Serial.print(starInsert);
-if (starInsert>30)
+if (starInsert>60)
 {
-  //Serial.println();
+  Serial.println();
   starInsert = 0;
 
 newStar();
