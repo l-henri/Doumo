@@ -5,8 +5,8 @@
 */
 
 // Change this to be at least as long as your pixel string (too long will work fine, just be a little slower)
-#include <avr/pgmspace.h>
-#define PIXELS 300  // Number of pixels in the string
+
+#define PIXELS 144  // Number of pixels in the string
 
 // These values depend on which pin your string is connected to and what board you are using 
 // More info on how to find these at http://www.arduino.cc/en/Reference/PortManipulation
@@ -16,7 +16,9 @@
 
 #define PIXEL_PORT  PORTD  // Port of the pin the pixels are connected to
 #define PIXEL_DDR   DDRD  // Port of the pin the pixels are connected to
+//#define PIXEL_BIT   6      // Bit of the pin the pixels are connected to
 #define PIXEL_BIT   3      // Bit of the pin the pixels are connected to
+
 
 // These are the timing constraints taken mostly from the WS2812 datasheets 
 // These are chosen to be conservative and avoid problems rather than for maximum throughput 
@@ -39,146 +41,54 @@
 
 #define NS_TO_CYCLES(n) ( (n) / NS_PER_CYCLE )
 
-// For testing purposes only
-int starInsert = 0;
-
-// Shooting star variables
-/*
-int starNumber = how many stars are currently running
-int myStarz[] = the relative position of each star to the one before it
-*/
-#define STAR_MAX_NUMBER 10
-unsigned long time;
-
-bool isAnimating = false;
-
-int starNumber = 0;
-int myStarz[STAR_MAX_NUMBER];
-byte myStarzR[STAR_MAX_NUMBER];
-byte myStarzG[STAR_MAX_NUMBER];
-byte myStarzB[STAR_MAX_NUMBER];
-
-// Theatre-style crawling lights.
-// Changes spacing to be dynmaic based on string size
-
-#define THEATER_SPACING (PIXELS/20)
 
 
-void shootingStar() {
-  
-  
-      
-      
-      unsigned int myCounter=0;
-      unsigned int step=0;
-      cli();
-      
-      
-      for (int i=0; i < PIXELS ; i++) {
-        
-        
-        if (step==myStarz[myCounter] && myCounter < STAR_MAX_NUMBER) {
-          
-          sendPixel( myStarzR[myCounter] , myStarzG[myCounter] , myStarzB[myCounter] );
-          myCounter++;
-          step=0;
-          } 
-        else {
-          step++;
-          sendPixel( 0 , 0 , 0 );
-          
-        }
-       
-        
-      }
-      
-      sei();
-      
-      show();
-      //Serial.println(myCounter);
-      myStarz[0]++;
-      //delay(wait);
-      //starIncrement();
-     
-    if (myCounter == 0)
-      {
-        Serial.println("Stop Animation");
-      isAnimating = false;
-      }
-    
-  
-  
-}
-void newStar()
-{
-  isAnimating = true;
-  Serial.println("New Star");
-for (int i = STAR_MAX_NUMBER-1; i >0;i--)
-  {
-  myStarz[i] = myStarz[i-1];
-  myStarzR[i] = myStarzR[i-1];
-  myStarzG[i] = myStarzG[i-1];
-  myStarzB[i] = myStarzB[i-1];
-  //Serial.println(myStarz[i-1]);
-  }
-  myStarz[0]=0;
-  myStarzR[0] = random(0,120);
-  myStarzG[0] = random(0,120);
-  myStarzB[0] = random(0,120);
-    
-  }
+
 
 void setup() {
-    isAnimating = true;
+    
   ledsetup();
   Serial.begin(9600);
-  for (int i = 0; i <STAR_MAX_NUMBER;i++)
-  {
-  myStarz[i] = 2;
-  myStarzR[i] = 0;
-  myStarzG[i] = 0;
-  myStarzB[i] = 0;
-  }
-  myStarzR[0] = 10;
-  myStarzG[1] = 10;
-  myStarzB[2] = 10;
+
   
 }
-
 
 
 void loop() {
- 
-  //Serial.println("Call 1");
-//  myTest();
-//  theaterChase(127, 127, 127, 10); // White
-//   Serial.println("Call 2");
   
-if (millis() - time > 10 && isAnimating)
-{shootingStar(); 
-time = millis();
-starInsert++;
-}
+  
+volatile unsigned int i = 0;
+volatile unsigned int jobi = 0;
 
-//Serial.print("*");
-//Serial.print(starInsert);
-if (starInsert>60)
-{
-  Serial.println();
-  starInsert = 0;
-
-newStar();
-}
+  cli();    
 
 
-return;
+  for(int i=0;i<PIXELS;i++){
+    Serial.println( i);
+    
+      cli();   
+   for (int j = 0; j < i; j++)
+   {
+      
+  sendPixel(200,200,200);
+ }
+ Serial.println();
+    sei();
+    show();     
+    delay(500); 
+  }
+
+   
+
+    
+    
+ //sendPixel( int(abs(float(cos(M_PI*i/72)+cos(M_PI*x/32))/2*roof_intensity)),int(abs(float(cos(M_PI*i/36)+cos(M_PI*x/64))/2*roof_intensity)),int(abs(float(cos(M_PI*i/18)+cos(M_PI*x/128))/2*roof_intensity)) );
+
   
 }
 
-// Actually send a bit to the string. We must to drop to asm to enusre that the complier does
-// not reorder things and make it so the delay happens in the wrong place.
 
-void sendBit( bool bitVal ) {
+inline void sendBit( bool bitVal ) {
   
     if (  bitVal ) {				// 0 bit
       
@@ -233,7 +143,7 @@ void sendBit( bool bitVal ) {
 }  
 
   
-void sendByte( unsigned char byte ) {
+inline void sendByte( unsigned char byte ) {
     
     for( unsigned char bit = 0 ; bit < 8 ; bit++ ) {
       
@@ -243,15 +153,6 @@ void sendByte( unsigned char byte ) {
       
     }           
 } 
-
-/*
-  The following three functions are the public API:
-  
-  ledSetup() - set up the pin that is connected to the string. Call once at the begining of the program.  
-  sendPixel( r g , b ) - send a single pixel to the string. Call this once for each pixel in a frame.
-  show() - show the recently sent pixel on the LEDs . Call once per frame. 
-  
-*/
 
 
 // Set the specified pin up as digital out
@@ -292,6 +193,3 @@ void show() {
   taken by any interrupts + the time in our pixel generation code never exceeded the reset time (5us).
   
 */
-
-
-

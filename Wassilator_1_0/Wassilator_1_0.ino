@@ -15,7 +15,7 @@
 
 #define PIXEL_PORT  PORTD  // Port of the pin the pixels are connected to
 #define PIXEL_DDR   DDRD  // Port of the pin the pixels are connected to
-#define PIXEL_BIT   6      // Bit of the pin the pixels are connected to
+#define PIXEL_BIT   3      // Bit of the pin the pixels are connected to
 
 // These are the timing constraints taken mostly from the WS2812 datasheets 
 // These are chosen to be conservative and avoid problems rather than for maximum throughput 
@@ -58,10 +58,15 @@ SIM800 variables
 
 */
 
-SoftwareSerial sim800l(7, 8); // RX, TX
-String ThankYouMessage = "Merci pour votre pensee!";
+// For PCB card
+//SoftwareSerial sim800l(7, 8); // RX, TX
+// For tupperware card
+SoftwareSerial sim800l(8, 7); // RX, TX
+
+String ThankYouMessage = "Merci pour votre pensee! Pour envoyer un SMS a Wassily, essayez le 0782759242 ;-)";
+String statisticsMessage = "Je t'ai reconnu!";
 //String HenriNumber = "+13472177389";
-String HenriNumber = "+19172385456";
+String HenriNumber = "+33633327492";
 
 bool isAnimating = false;
 bool hasSmsToSend = false;
@@ -79,10 +84,37 @@ delay(1000);
   //Set Debug mode
   sim800l.write("AT+CMEE=2\r\n");
   delay(1000);
-  //Set SMS format to ASCII
-  sim800l.write("AT+CMGF=1\r\n");
+
+  
+    if (sim800l.available()) {
+    
+     while(sim800l.available())   {
+    Serial.write(sim800l.read());
+    delay(1); }
+          Serial.println();
+          //Set SMS format to ASCII
+  }
+
+
+          Serial.println();
+          Serial.println("WSLT1.0");
+          Serial.println("Ecrire PIN");
+
+            sim800l.write("AT+CPIN=4321\r\n");
+  delay(10000);
+  
+    if (sim800l.available()) {
+    
+     while(sim800l.available())   {
+    Serial.write(sim800l.read());
+    delay(1); }
+    //Set SMS format to ASCII
+  }
+          Serial.println();
+          Serial.println("Test CNUM");
+
+            sim800l.write("AT+CNUM\r\n");
   delay(1000);
- deleteAllMessages();
   
     if (sim800l.available()) {
     
@@ -91,13 +123,19 @@ delay(1000);
     delay(1); }
           Serial.println();
 
+  //Set SMS format to ASCII
   }
+  
+    //Set SMS format to ASCII
+  sim800l.write("AT+CMGF=1\r\n");
+  delay(1000);
+ deleteAllMessages();
   
   Serial.println("Setup Complete!");
   
   //Serial.println("Sending SMS...");
    
- // sendThankYouMessage(HenriNumber,"Program Starting yo");
+  sendThankYouMessage(HenriNumber,"Program Starting yo");
  ledsetup();
   for (int i = 0; i <STAR_MAX_NUMBER;i++)
   {
@@ -215,11 +253,10 @@ void processingSms()
 //       else if ((mySms.substring(0,4) == "+336" || mySms.substring(1,5) == "+337" ) && !isAnimating)
 //      else if (isAnimating)
 
-      if ((mySms.substring(0,2) == "+1" || mySms.substring(0,2) == "+1") && !isAnimating )
+      if (mySms==HenriNumber)
         {
-        Serial.println("Sending message");
-       // isAnimating = true;
-        sendThankYouMessage(mySms,ThankYouMessage);
+          Serial.println("Sending Statistics");
+        sendThankYouMessage(HenriNumber,statisticsMessage);
         }
       else if (isAnimating)
         {
@@ -228,11 +265,16 @@ void processingSms()
         hasSmsToSend = true;
         //sendThankYouMessage(mySms,ThankYouMessage);
         }
-      else if (mySms==HenriNumber)
+      else if ((mySms.substring(0,4) == "+336" || mySms.substring(0,4) == "+337") && !isAnimating )
         {
-        Serial.println("Sending Statistics");
-        //sendThankYouMessage(HenriNumber,statisticsMessage);
-        }  
+         Serial.println("Sending message");
+       // isAnimating = true;
+        sendThankYouMessage(mySms,ThankYouMessage);
+        }
+        else
+        {
+          Serial.println("Not sending anything");
+          }  
 
       Serial.println("**********************************************");
 

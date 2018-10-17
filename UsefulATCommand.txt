@@ -1,12 +1,15 @@
-Demander numero de SIM
-AT+CNUM=?
-
-
-
+### Init
 
 Activer retour verbose
 AT+CMEE=2
 
+
+## Check card
+Demander numero de SIM
+AT+CNUM=?
+
+
+### Check SMS
 Activer mode texte sim
 AT+CMGF=1
 
