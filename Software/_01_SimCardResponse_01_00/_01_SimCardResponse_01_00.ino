@@ -8,7 +8,7 @@
 SoftwareSerial sim800l(7, 8); // RX, TX
 String ThankYouMessage = "Merci pour votre pensee!";
 //String HenriNumber = "+13472177389";
-String HenriNumber = "+19172385456";
+String HenriNumber = "+33633327492";
 bool isAnimating = false;
 bool hasSmsToSend = false;
 

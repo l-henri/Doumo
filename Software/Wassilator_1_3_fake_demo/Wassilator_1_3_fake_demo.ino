@@ -5,7 +5,7 @@
 */
 #include <SoftwareSerial.h>
 #include <avr/pgmspace.h>
-#define PIXELS 18  // Number of pixels in the string
+#define PIXELS 16  // Number of pixels in the string
 
 // These values depend on which pin your string is connected to and what board you are using 
 // More info on how to find these at http://www.arduino.cc/en/Reference/PortManipulation
@@ -63,10 +63,10 @@ SoftwareSerial sim800l(7, 8); // RX, TX
 // For tupperware card
 //SoftwareSerial sim800l(8, 7); // RX, TX
 
-String ThankYouMessage = "Merci pour votre pensee! Pour envoyer un SMS a Wassily, essayez le 0782759242 ;-)";
+String ThankYouMessage = "Merci pour votre message!";
 String statisticsMessage = "Je t'ai reconnu!";
 //String HenriNumber = "+13472177389";
-String HenriNumber = "+33633327492";
+String HenriNumber = "+33643950145";
 
 bool isAnimating = false;
 bool hasSmsToSend = false;
@@ -75,102 +75,45 @@ bool hasSmsToSend = false;
 
 
 void setup() {
-  
-  
-Serial.begin(9600);
-sim800l.begin(9600);
-delay(1000);
-
-  //Set Debug mode
-  sim800l.write("AT+CMEE=2\r\n");
-  delay(1000);
-
-  
-    if (sim800l.available()) {
-    
-     while(sim800l.available())   {
-    Serial.write(sim800l.read());
-    delay(1); }
-          Serial.println();
-          //Set SMS format to ASCII
-  }
-
-
-          Serial.println();
-          Serial.println("WSLT1.0");
-          Serial.println("Ecrire PIN");
-
-            sim800l.write("AT+CPIN=4321\r\n");
-  delay(10000);
-  
-    if (sim800l.available()) {
-    
-     while(sim800l.available())   {
-    Serial.write(sim800l.read());
-    delay(1); }
-    //Set SMS format to ASCII
-  }
-          Serial.println();
-          Serial.println("Test CNUM");
-
-            sim800l.write("AT+CNUM\r\n");
-  delay(1000);
-  
-    if (sim800l.available()) {
-    
-     while(sim800l.available())   {
-    Serial.write(sim800l.read());
-    delay(1); }
-          Serial.println();
-
-  //Set SMS format to ASCII
-  }
-  
-    //Set SMS format to ASCII
-  sim800l.write("AT+CMGF=1\r\n");
-  delay(1000);
- deleteAllMessages();
-  
-  Serial.println("Setup Complete!");
-  
-  //Serial.println("Sending SMS...");
-   
-  sendThankYouMessage(HenriNumber,"Program Starting yo");
  ledsetup();
-  for (int i = 0; i <STAR_MAX_NUMBER;i++)
-  {
-  myStarz[i] = 0;
-  myStarzR[i] = 0;
-  myStarzG[i] = 0;
-  myStarzB[i] = 0;
-  }
-  myStarzR[0] = 10;
-  myStarzG[1] = 10;
-  myStarzB[2] = 10;
+     cli();  
+  for(int i=0;i<PIXELS;i++){    
+       
+  sendPixel(0,0,0);
+ }
+    sei();
+    show();  
 
-shootingStar();
-isAnimating = true;
+breath(100, 100, 100, 500);
+
 }
 
 
 void loop() {
- 
 
-/*
-Waiting for an SMS Message
-*/  
-  while(lookForKeyword("+CMTI"))
-    {
-      processingSms();
-      newStar();
-    }
-//Serial.println("a la fraiche");
+ delay(10000);
 
-  if (millis() - time > 10 && isAnimating)
-      {
-        shootingStar(); 
-      time = millis();
-      }
+// Fake hope
+            breath(0, 30, 6, 50);
+            breath(0, 60, 12, 100);
+            breath(0, 90, 18, 250);
+            breath(0, 121, 24, 750);
+
+ delay(15000);
+// Fake happy
+          breath(64, 55, 0, 50);
+          breath(128, 105, 0, 100);
+          breath(191, 155, 0, 250);
+          breath(255, 210, 0, 750);
+ delay(12000);
+
+// Tout le reste
+        breath(50, 50, 50,50);
+      breath(100, 100, 100,100);
+      breath(150, 150, 150,250);
+      breath(200, 200, 200,750);
+
+
 }
 
 
@@ -182,7 +125,7 @@ Modem library
 
 */
 
-void processingSms()
+String processingSms()
 {
 
    /*
@@ -201,9 +144,7 @@ void processingSms()
         
         }
       if (mySms == "")
-        {Serial.println("Did not find SMS number");return;}
-      else if (mySms[0] == '7')
-        {deleteAllMessages();}
+        {Serial.println("Did not find SMS number");return "";}
         
       Serial.print("My SMS number is ");
       Serial.println(mySms);  
@@ -219,17 +160,17 @@ void processingSms()
         sim800l.println("\n\r");
         
         int counter = 0;
+          delay(5);
+          while(!sim800l.available())   {}
+       // Serial.println("Reading answer now");
+        // Empyting buffer because message comes in two steps
+        emptyBuffer();
+        delay(5);
+          while(!sim800l.available())   {}
+        //Serial.println("Finished reading") ;
 
-        delay(100);
-        Serial.println("Reading answer now");
-      //  listenToModem();
-//        while(!lookForKeyword("+CMGR"))
-//          {
-//          Serial.println("Out1");
-//          }
-          //Serial.println("Out2");
-        //Serial.println("Reading answer");
-        while(counter <3 && lookForKeyword(String(char(34)) ) )
+        // Counting " to wait for phone number
+        while(counter <3 && lookForKeyword(String(char(34)) ) ) //char(340 is "
           {
             //Serial.print("Loop ");
           //Serial.println(counter);
@@ -237,23 +178,50 @@ void processingSms()
         }
         if (counter < 2)
         {
-        Serial.println("Did not find symbol");
-        return;}
+        Serial.println("Did not find \" symbol");
+        return "";}
       Serial.println("Retrieving phone number");
-      mySms = "";
-      mySms = retrieveMessage('\"');
-      if (mySms == "")
-        {Serial.println("Did not find phone number");return;}
+      String mySmsNumber = "";
+      mySmsNumber = retrieveMessage('\"');
+      if (mySmsNumber == "")
+        {Serial.println("Did not find phone number");return "";}
      Serial.print("My phone number is ");
-      Serial.println(mySms); 
+      Serial.println(mySmsNumber); 
+
+       lookForKeyword("\r");
       
+//       String myMessageTest = retrieveMessage('\"');
+//       Serial.println(myMessageTest);
+//       while(counter <3 ) 
+//          {
+//            
+//            
+//            //Serial.print("Loop ");
+//          
+//          counter++;
+//          Serial.println(counter);
+//          myMessageTest = retrieveMessage('\"');
+//          Serial.println(myMessageTest);
+//        }
+        //Serial.println("Out of counter loop 2");
+         
+//
+//      // Looking for carriage return (ascii code 10) to read message
+//      lookForKeyword(String(char(10)) );  //char(10) is return carriage
+//    
+        String myMessage = "";
+        myMessage = retrieveMessage('\r');
+      if (myMessage == "")
+        {Serial.println("Did not find message");return "";}
+       Serial.print("My message is ");
+      Serial.println(myMessage); 
       
 
 //      if (mySms==HenriNumber)
 //       else if ((mySms.substring(0,4) == "+336" || mySms.substring(1,5) == "+337" ) && !isAnimating)
 //      else if (isAnimating)
 
-      if (mySms==HenriNumber)
+      if (mySmsNumber==HenriNumber)
         {
           Serial.println("Sending Statistics");
         sendThankYouMessage(HenriNumber,statisticsMessage);
@@ -265,11 +233,11 @@ void processingSms()
         hasSmsToSend = true;
         //sendThankYouMessage(mySms,ThankYouMessage);
         }
-      else if ((mySms.substring(0,4) == "+336" || mySms.substring(0,4) == "+337") && !isAnimating )
+      else if ((mySmsNumber.substring(0,4) == "+336" || mySmsNumber.substring(0,4) == "+337") && !isAnimating )
         {
          Serial.println("Sending message");
        // isAnimating = true;
-        sendThankYouMessage(mySms,ThankYouMessage);
+        sendThankYouMessage(mySmsNumber,ThankYouMessage);
         }
         else
         {
@@ -277,7 +245,9 @@ void processingSms()
           }  
 
       Serial.println("**********************************************");
-
+      if (mySms[0] == '9')
+        {deleteAllMessages();}
+      return myMessage.substring(1,myMessage.length());
 }
 
 void deleteAllMessages()
@@ -318,7 +288,10 @@ bool lookForKeyword(String myKeyWord)
 if (sim800l.available())
 
   {
-    //Serial.println("Entering Function");
+//    Serial.print("Entering Function looking for :");
+//    Serial.print(myKeyWord[0]);
+//    Serial.print(" of length: ");
+//    Serial.println(myKeyWord.length());
 
      while(sim800l.available())   {
        
@@ -326,6 +299,7 @@ if (sim800l.available())
       if (c == myKeyWord[mySearch])
          {
          mySearch = mySearch + 1;
+         
          }
       else
          {
@@ -334,7 +308,7 @@ if (sim800l.available())
       //Serial.print(c);   
       if (mySearch == myKeyWord.length())
          {
-        // Serial.println("Keyword detected");
+        //Serial.println("Keyword detected");
          mySearch = 0;
          return true;
          break;
@@ -383,9 +357,12 @@ String retrieveMessage(char stopChar)
             char c = sim800l.read();
          
             //Serial.println("Looking for message");
-            while (c != stopChar && iter < 20 && sim800l.available())
+            //Serial.print("stopCHar is :");
+            //Serial.print(stopChar);
+            //Serial.println("Stops here");
+            while (c != stopChar && iter < 50 && sim800l.available())
               {
-              //Serial.print(c);
+              //Serial.write(c);
               myMessage += c;
               c = sim800l.read();
               delay(2);
@@ -400,13 +377,90 @@ String retrieveMessage(char stopChar)
 }
 
 
+void emptyBuffer()
+ {
 
+       while(sim800l.available())   {
+      
+//      Serial.write(sim800l.read());
+      sim800l.read();
+      delay(2); 
+      }
+      //Serial.println("Buffer emptied");
+    }
 
 /*
 
 Led Animation Library
 
 */
+
+void breath(int targetR, int targetG, int targetB, int riseDurationInMilliseconds) {
+   Serial.println("Breathing");
+
+//  int maxValue = max(max(targetR, targetG), targetB);
+//
+//  int rIncrementValue = targetR /100;
+//  if (rIncrementValue == 0)
+//    {rIncrementValue = 1;}
+//  int gIncrementValue = targetG /100;
+//  if (gIncrementValue == 0)
+//    {gIncrementValue = 1;}
+//      int bIncrementValue = targetB /100;
+//  if (bIncrementValue == 0)
+//    {bIncrementValue = 1;}
+//    
+   int stepCounter = 0;
+    bool goingUp = true;
+
+    while (stepCounter > 0 || goingUp )
+    {
+
+    int rValue = targetR * stepCounter/100;
+    int gValue = targetG * stepCounter/100;
+    int bValue = targetB * stepCounter/100;
+//    Serial.print("stepCounter ");
+//    Serial.print(stepCounter);
+//    Serial.print(" targetR ");
+//    Serial.print(rValue);
+//    Serial.print(" targetG ");
+//    Serial.print(gValue);
+//    Serial.print(" targetB ");
+//    Serial.println(bValue);
+
+    if (goingUp)
+    
+    {stepCounter += 1;}
+    else
+    {stepCounter -=1;}
+      if (stepCounter == 100)
+    {
+      goingUp = false;}
+   cli();  
+  for(int i=0;i<PIXELS;i++){    
+       
+  sendPixel(rValue,gValue,bValue);
+ }
+    sei();
+    show();  
+    if (goingUp)
+      {delay(riseDurationInMilliseconds/100 * 3);}
+    else
+      {delay(riseDurationInMilliseconds/100 * 3);}
+    
+    }
+
+    cli();  
+  for(int i=0;i<PIXELS;i++){    
+       
+  sendPixel(0,0,0);
+ }
+    sei();
+    show();  
+   Serial.println("Stopped");
+
+}
+
 
 void shootingStar() {
   

@@ -4,8 +4,8 @@
 // Connect TX (data out from SIM800L) to Digital 8
 // Importation librairie
 #include <SoftwareSerial.h>
-//SoftwareSerial sim800l(7,8); // RX, TX
-SoftwareSerial sim800l(8,7); // RX, TX
+SoftwareSerial sim800l(7,8); // RX, TX
+//SoftwareSerial sim800l(8,7); // RX, TX
 
 void setup() {
 Serial.begin(9600);
@@ -22,8 +22,12 @@ void loop() {
   if (sim800l.available()) {
     
      while(sim800l.available())   {
-    Serial.write(sim800l.read());
-    delay(1); }
+      int robert = sim800l.read();
+      Serial.print(char(robert));
+//      Serial.print("       ");
+//      Serial.println(robert);
+    //Serial.write();
+    delay(2); }
           Serial.println();
 
   }

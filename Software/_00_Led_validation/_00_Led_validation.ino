@@ -5,8 +5,8 @@
 */
 
 // Change this to be at least as long as your pixel string (too long will work fine, just be a little slower)
-
-#define PIXELS 10  // Number of pixels in the string
+#include <avr/pgmspace.h>
+#define PIXELS 18  // Number of pixels in the string
 
 // These values depend on which pin your string is connected to and what board you are using 
 // More info on how to find these at http://www.arduino.cc/en/Reference/PortManipulation
@@ -16,9 +16,7 @@
 
 #define PIXEL_PORT  PORTD  // Port of the pin the pixels are connected to
 #define PIXEL_DDR   DDRD  // Port of the pin the pixels are connected to
-//#define PIXEL_BIT   6      // Bit of the pin the pixels are connected to
 #define PIXEL_BIT   3      // Bit of the pin the pixels are connected to
-
 
 // These are the timing constraints taken mostly from the WS2812 datasheets 
 // These are chosen to be conservative and avoid problems rather than for maximum throughput 
@@ -42,52 +40,65 @@
 #define NS_TO_CYCLES(n) ( (n) / NS_PER_CYCLE )
 
 
+// Shooting star variables
 
+int isLitUp;
+bool goingUp;
+
+#define STAR_MAX_NUMBER 10
+
+// Theatre-style crawling lights.
+// Changes spacing to be dynmaic based on string size
+
+#define THEATER_SPACING (PIXELS/20)
 
 
 void setup() {
-    
   ledsetup();
   Serial.begin(9600);
-
+  isLitUp = 0;
+  goingUp = true;
+     cli();  
+  for(int i=0;i<144;i++){    
+       
+  sendPixel(isLitUp,isLitUp,isLitUp);
+ }
+    sei();
+    show();   
   
 }
+
 
 
 void loop() {
-  
-  
-volatile unsigned int i = 0;
-volatile unsigned int jobi = 0;
+    if (isLitUp == 0)
+    {goingUp = true;}
+    else if (isLitUp == 100)
+    {
+      goingUp = false;}
+    if (goingUp)
+    {isLitUp += 1;}
+    else
+    {isLitUp -=1;}
 
-  cli();    
-
-
-  for(int i=0;i<PIXELS;i++){
-    //   for (int j = 0; j < i; j++)
-//   {
-//      
-//  sendPixel(200,200,200);
-// }
-sendPixel(20,20,20);
-
-  }
-   Serial.println();
+  Serial.println(isLitUp);
+   cli();  
+  for(int i=0;i<PIXELS;i++){    
+       
+  sendPixel(isLitUp,isLitUp,isLitUp);
+ }
     sei();
     show();     
-    delay(500); 
-
-   
 
     
     
- //sendPixel( int(abs(float(cos(M_PI*i/72)+cos(M_PI*x/32))/2*roof_intensity)),int(abs(float(cos(M_PI*i/36)+cos(M_PI*x/64))/2*roof_intensity)),int(abs(float(cos(M_PI*i/18)+cos(M_PI*x/128))/2*roof_intensity)) );
-
-  
+delay(50);
 }
 
+// Actually send a bit to the string. We must to drop to asm to enusre that the complier does
+// not reorder things and make it so the delay happens in the wrong place.
 
-inline void sendBit( bool bitVal ) {
+void sendBit( bool bitVal ) {
   
     if (  bitVal ) {				// 0 bit
       
@@ -142,7 +153,7 @@ inline void sendBit( bool bitVal ) {
 }  
 
   
-inline void sendByte( unsigned char byte ) {
+void sendByte( unsigned char byte ) {
     
     for( unsigned char bit = 0 ; bit < 8 ; bit++ ) {
       
@@ -152,6 +163,15 @@ inline void sendByte( unsigned char byte ) {
       
     }           
 } 
+
+/*
+  The following three functions are the public API:
+  
+  ledSetup() - set up the pin that is connected to the string. Call once at the begining of the program.  
+  sendPixel( r g , b ) - send a single pixel to the string. Call this once for each pixel in a frame.
+  show() - show the recently sent pixel on the LEDs . Call once per frame. 
+  
+*/
 
 
 // Set the specified pin up as digital out
@@ -192,3 +212,6 @@ void show() {
   taken by any interrupts + the time in our pixel generation code never exceeded the reset time (5us).
   
 */
+
+
+

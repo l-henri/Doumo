@@ -16,7 +16,10 @@
 
 #define PIXEL_PORT  PORTD  // Port of the pin the pixels are connected to
 #define PIXEL_DDR   DDRD  // Port of the pin the pixels are connected to
-#define PIXEL_BIT   6      // Bit of the pin the pixels are connected to
+// PCB card
+#define PIXEL_BIT   3      // Bit of the pin the pixels are connected to
+//Arduino uno card
+//#define PIXEL_BIT   6      // Bit of the pin the pixels are connected to
 
 // These are the timing constraints taken mostly from the WS2812 datasheets 
 // These are chosen to be conservative and avoid problems rather than for maximum throughput 

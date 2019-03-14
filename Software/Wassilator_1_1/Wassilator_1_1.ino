@@ -5,7 +5,7 @@
 */
 #include <SoftwareSerial.h>
 #include <avr/pgmspace.h>
-#define PIXELS 18  // Number of pixels in the string
+#define PIXELS 16  // Number of pixels in the string
 
 // These values depend on which pin your string is connected to and what board you are using 
 // More info on how to find these at http://www.arduino.cc/en/Reference/PortManipulation
@@ -63,10 +63,10 @@ SoftwareSerial sim800l(7, 8); // RX, TX
 // For tupperware card
 //SoftwareSerial sim800l(8, 7); // RX, TX
 
-String ThankYouMessage = "Merci pour votre pensee! Pour envoyer un SMS a Wassily, essayez le 0782759242 ;-)";
+String ThankYouMessage = "Merci pour votre message, je me suis allumé!";
 String statisticsMessage = "Je t'ai reconnu!";
 //String HenriNumber = "+13472177389";
-String HenriNumber = "+33633327492";
+String HenriNumber = "+33643950145";
 
 bool isAnimating = false;
 bool hasSmsToSend = false;
@@ -75,11 +75,18 @@ bool hasSmsToSend = false;
 
 
 void setup() {
-  
-  
+ ledsetup();
+     cli();  
+  for(int i=0;i<PIXELS;i++){    
+       
+  sendPixel(0,0,0);
+ }
+    sei();
+    show();  
 Serial.begin(9600);
+Serial.println("Started serial communication");
 sim800l.begin(9600);
-delay(1000);
+delay(5000);
 
   //Set Debug mode
   sim800l.write("AT+CMEE=2\r\n");
@@ -101,7 +108,7 @@ delay(1000);
           Serial.println("Ecrire PIN");
 
             sim800l.write("AT+CPIN=4321\r\n");
-  delay(10000);
+  delay(15000);
   
     if (sim800l.available()) {
     
@@ -136,20 +143,21 @@ delay(1000);
   //Serial.println("Sending SMS...");
    
   sendThankYouMessage(HenriNumber,"Program Starting yo");
- ledsetup();
-  for (int i = 0; i <STAR_MAX_NUMBER;i++)
-  {
-  myStarz[i] = 0;
-  myStarzR[i] = 0;
-  myStarzG[i] = 0;
-  myStarzB[i] = 0;
-  }
-  myStarzR[0] = 10;
-  myStarzG[1] = 10;
-  myStarzB[2] = 10;
 
-shootingStar();
-isAnimating = true;
+breath();
+//  for (int i = 0; i <STAR_MAX_NUMBER;i++)
+//  {
+//  myStarz[i] = 0;
+//  myStarzR[i] = 0;
+//  myStarzG[i] = 0;
+//  myStarzB[i] = 0;
+//  }
+//  myStarzR[0] = 10;
+//  myStarzG[1] = 10;
+//  myStarzB[2] = 10;
+//
+//shootingStar();
+//isAnimating = true;
 }
 
 
@@ -161,16 +169,17 @@ Waiting for an SMS Message
 */  
   while(lookForKeyword("+CMTI"))
     {
+breath();
       processingSms();
-      newStar();
+//      newStar();
     }
 //Serial.println("a la fraiche");
-
-  if (millis() - time > 10 && isAnimating)
-      {
-        shootingStar(); 
-      time = millis();
-      }
+//
+//  if (millis() - time > 10 && isAnimating)
+//      {
+//        shootingStar(); 
+//      time = millis();
+//      }
 }
 
 
@@ -407,6 +416,38 @@ String retrieveMessage(char stopChar)
 Led Animation Library
 
 */
+
+void breath() {
+   Serial.println("Breathing");
+
+   int isLitUp = 1;
+    bool goingUp = true;
+
+    while (isLitUp > 0 )
+    {
+
+ 
+  if (isLitUp == 100)
+    {
+      goingUp = false;}
+    if (goingUp)
+    {isLitUp += 1;}
+    else
+    {isLitUp -=1;}
+    
+   cli();  
+  for(int i=0;i<PIXELS;i++){    
+       
+  sendPixel(isLitUp,isLitUp,isLitUp);
+ }
+    sei();
+    show();  
+    delay(50);
+    }
+   Serial.println("Stopped");
+
+}
+
 
 void shootingStar() {
   

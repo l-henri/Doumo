@@ -3,10 +3,9 @@
  This code is optimized for understandability and changability rather than raw speed
  More info at http://wp.josh.com/2014/05/11/ws2812-neopixels-made-easy/
 */
-
-// Change this to be at least as long as your pixel string (too long will work fine, just be a little slower)
-
-#define PIXELS 10  // Number of pixels in the string
+#include <SoftwareSerial.h>
+#include <avr/pgmspace.h>
+#define PIXELS 225  // Number of pixels in the string
 
 // These values depend on which pin your string is connected to and what board you are using 
 // More info on how to find these at http://www.arduino.cc/en/Reference/PortManipulation
@@ -16,78 +15,253 @@
 
 #define PIXEL_PORT  PORTD  // Port of the pin the pixels are connected to
 #define PIXEL_DDR   DDRD  // Port of the pin the pixels are connected to
-//#define PIXEL_BIT   6      // Bit of the pin the pixels are connected to
 #define PIXEL_BIT   3      // Bit of the pin the pixels are connected to
-
 
 // These are the timing constraints taken mostly from the WS2812 datasheets 
 // These are chosen to be conservative and avoid problems rather than for maximum throughput 
 
 #define T1H  900    // Width of a 1 bit in ns
 #define T1L  600    // Width of a 1 bit in ns
-
 #define T0H  400    // Width of a 0 bit in ns
 #define T0L  900    // Width of a 0 bit in ns
-
 #define RES 6000    // Width of the low gap between bits to cause a frame to latch
 
 // Here are some convience defines for using nanoseconds specs to generate actual CPU delays
 
 #define NS_PER_SEC (1000000000L)          // Note that this has to be SIGNED since we want to be able to check for negative values of derivatives
-
 #define CYCLES_PER_SEC (F_CPU)
-
 #define NS_PER_CYCLE ( NS_PER_SEC / CYCLES_PER_SEC )
-
 #define NS_TO_CYCLES(n) ( (n) / NS_PER_CYCLE )
+
+
+/*
+Shooting star variables
+int starNumber = how many stars are currently running
+int myStarz[] = the relative position of each star to the one before it
+byte myStarzR[STAR_MAX_NUMBER] = R value for shooting star
+byte myStarzG[STAR_MAX_NUMBER] = G value for shooting star
+byte myStarzB[STAR_MAX_NUMBER] = B value for shooting star
+*/
+#define STAR_MAX_NUMBER 10
+unsigned long time;
+
+int starNumber = 0;
+int myStarz[STAR_MAX_NUMBER];
+byte myStarzR[STAR_MAX_NUMBER];
+byte myStarzG[STAR_MAX_NUMBER];
+byte myStarzB[STAR_MAX_NUMBER];
+
 
 
 
 
 
 void setup() {
-    
-  ledsetup();
-  Serial.begin(9600);
-
+ ledsetup();
+     cli();  
+  for(int i=0;i<225;i++){    
+       
+  sendPixel(0,0,0);
+ }
+    sei();
+    show();  
+Serial.begin(9600);
+Serial.println("Started serial communication");
+ 
+  Serial.println("Setup Complete!");
   
+
+//breath();
+
 }
 
 
 void loop() {
-  
-  
-volatile unsigned int i = 0;
-volatile unsigned int jobi = 0;
+ 
 
-  cli();    
+/*
+Waiting for an SMS Message
+*/  
 
+cli();  
+        for(int i=0;i<50;i++)
+              {    
+               sendPixel(0,121,24); // HOPE     
+               // Tests verts
+              // sendPixel(93,184,96); // Pantone 362
+              //sendPixel(0,121,52); // Pantone 356
+              // sendPixel(114,180,49); // Pantone 369
 
-  for(int i=0;i<PIXELS;i++){
-    //   for (int j = 0; j < i; j++)
-//   {
-//      
-//  sendPixel(200,200,200);
-// }
-sendPixel(20,20,20);
+              // Jaune
+              // sendPixel(255,210,0); // Happy
+              
+              // Rouge
+              //sendPixel(245, 20, 0); // Love
 
-  }
-   Serial.println();
-    sei();
-    show();     
-    delay(500); 
+              // Orange
+              // sendPixel(245, 41, 0); // Hugs, orange
+              // sendPixel(190, 58, 53); // Hugs, rose
+             }
+          sei();
+          show();  
+delay(5000);
+cli();  
+        for(int i=0;i<50;i++)
+              {    
+               //sendPixel(0,121,24); // HOPE     
+               // Tests verts
+              // sendPixel(93,184,96); // Pantone 362
+              //sendPixel(0,121,52); // Pantone 356
+              // sendPixel(114,180,49); // Pantone 369
 
-   
+              // Jaune
+               sendPixel(255,210,0); // Happy
+              
+              // Rouge
+              //sendPixel(245, 20, 0); // Love
 
-    
-    
- //sendPixel( int(abs(float(cos(M_PI*i/72)+cos(M_PI*x/32))/2*roof_intensity)),int(abs(float(cos(M_PI*i/36)+cos(M_PI*x/64))/2*roof_intensity)),int(abs(float(cos(M_PI*i/18)+cos(M_PI*x/128))/2*roof_intensity)) );
+              // Orange
+              // sendPixel(245, 41, 0); // Hugs, orange
+              // sendPixel(190, 58, 53); // Hugs, rose
+             }
+          sei();
+          show();  
+delay(5000);
+cli();  
+        for(int i=0;i<50;i++)
+              {    
+               //sendPixel(0,121,24); // HOPE     
+               // Tests verts
+              // sendPixel(93,184,96); // Pantone 362
+              //sendPixel(0,121,52); // Pantone 356
+              // sendPixel(114,180,49); // Pantone 369
 
-  
+              // Jaune
+              // sendPixel(255,210,0); // Happy
+              
+              // Rouge
+              sendPixel(245, 20, 0); // Love
+
+              // Orange
+              // sendPixel(245, 41, 0); // Hugs, orange
+              // sendPixel(190, 58, 53); // Hugs, rose
+             }
+          sei();
+          show();  
+delay(5000);
+cli();  
+        for(int i=0;i<50;i++)
+              {    
+               //sendPixel(0,121,24); // HOPE     
+               // Tests verts
+              // sendPixel(93,184,96); // Pantone 362
+              //sendPixel(0,121,52); // Pantone 356
+              // sendPixel(114,180,49); // Pantone 369
+
+              // Jaune
+              // sendPixel(255,210,0); // Happy
+              
+              // Rouge
+              //sendPixel(245, 20, 0); // Love
+
+              // Orange
+              // sendPixel(245, 41, 0); // Hugs, orange
+              sendPixel(190, 58, 53); // Hugs, rose
+             }
+          sei();
+          show();  
+delay(5000);
+ 
+
 }
 
 
-inline void sendBit( bool bitVal ) {
+
+/*
+
+Led Animation Library
+
+*/
+
+void breath() {
+   Serial.println("Breathing");
+
+   int isLitUp = 1;
+    bool goingUp = true;
+  Serial.println("Turning all leds up to 25% power");
+    while (isLitUp > 0 )
+    {
+
+ 
+  if (isLitUp == 60)
+    {
+      goingUp = false;}
+    if (goingUp)
+    {isLitUp += 1;}
+    else
+    {isLitUp -=1;}
+    
+   cli();  
+  for(int i=0;i<PIXELS;i++){    
+       
+  sendPixel(isLitUp,isLitUp,isLitUp);
+ }
+    sei();
+    show();  
+    delay(50);
+    }
+   Serial.println("Finished");
+   Serial.println("Turning 50 leds up to 100% power");
+    isLitUp = 1;
+    goingUp = true;
+    while (isLitUp > 0 )
+    {
+
+       
+        if (isLitUp == 250)
+          {
+            goingUp = false;}
+          if (goingUp)
+            {isLitUp += 1;}
+          else
+            {isLitUp -=1;}
+          
+         cli();  
+        for(int i=0;i<50;i++)
+              {    
+                   
+              sendPixel(isLitUp,isLitUp,isLitUp);
+             }
+          sei();
+          show();  
+          delay(50);
+    }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+
+LED Strip library
+
+
+
+*/
+
+// Actually send a bit to the string. We must to drop to asm to enusre that the complier does
+// not reorder things and make it so the delay happens in the wrong place.
+
+void sendBit( bool bitVal ) {
   
     if (  bitVal ) {				// 0 bit
       
@@ -142,7 +316,7 @@ inline void sendBit( bool bitVal ) {
 }  
 
   
-inline void sendByte( unsigned char byte ) {
+void sendByte( unsigned char byte ) {
     
     for( unsigned char bit = 0 ; bit < 8 ; bit++ ) {
       
@@ -152,6 +326,15 @@ inline void sendByte( unsigned char byte ) {
       
     }           
 } 
+
+/*
+  The following three functions are the public API:
+  
+  ledSetup() - set up the pin that is connected to the string. Call once at the begining of the program.  
+  sendPixel( r g , b ) - send a single pixel to the string. Call this once for each pixel in a frame.
+  show() - show the recently sent pixel on the LEDs . Call once per frame. 
+  
+*/
 
 
 // Set the specified pin up as digital out
@@ -192,3 +375,4 @@ void show() {
   taken by any interrupts + the time in our pixel generation code never exceeded the reset time (5us).
   
 */
+
