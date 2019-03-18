@@ -88,11 +88,11 @@ Serial.println("Started serial communication");
 
 
 sim800l.begin(9600);
-delay(5000);
+delay(1000);
 
   //Set Debug mode
   sim800l.write("AT+CMEE=2\r\n");
-  delay(1000);
+  delay(5000);
 
   
     if (sim800l.available()) {
@@ -137,7 +137,7 @@ delay(5000);
   
     //Set SMS format to ASCII
   sim800l.write("AT+CMGF=1\r\n");
-  delay(5);
+  delay(5000);
 //  emptyBuffer();
  deleteAllMessages();
   
@@ -176,35 +176,35 @@ Waiting for an SMS Message
       {continue;}
     else if (myMessage.substring(0,4) == "Hope")
           {
-            breath(0, 30, 6, 50);
-            breath(0, 60, 12, 100);
-            breath(0, 90, 18, 250);
-            breath(0, 121, 24, 750);
+//            breath(0, 30, 6, 50);
+//            breath(0, 60, 12, 100);
+//            breath(0, 90, 18, 250);
+            breath(0, 121, 24, 2500);
             }
     else if (myMessage.substring(0,5) == "Happy")
           {
-          breath(64, 55, 0, 50);
-          breath(128, 105, 0, 100);
-          breath(191, 155, 0, 250);
-          breath(255, 210, 0, 750);}
+//          breath(64, 55, 0, 50);
+//          breath(128, 105, 0, 100);
+//          breath(191, 155, 0, 250);
+          breath(255, 210, 0, 2500);}
     else if (myMessage.substring(0,4) == "Love")
       {
-        breath(60, 5, 0, 50);
-      breath(120, 10, 0, 100);
-      breath(190, 15, 0, 250);
-      breath(245, 20, 0, 750);}
+//        breath(60, 5, 0, 50);
+//      breath(120, 10, 0, 100);
+//      breath(190, 15, 0, 250);
+      breath(245, 20, 0, 2500);}
     else if (myMessage.substring(0,3) == "Hug" )
       {
-        breath(47, 14, 10, 50);
-      breath(95, 29, 21, 100);
-      breath(142, 43, 31, 250);
-      breath(190, 58, 53, 750);}
+//        breath(47, 14, 10, 50);
+//      breath(95, 29, 21, 100);
+//      breath(142, 43, 31, 250);
+      breath(190, 58, 53, 2500);}
       else 
       {
-        breath(50, 50, 50,50);
-      breath(100, 100, 100,100);
-      breath(150, 150, 150,250);
-      breath(200, 200, 200,750);}
+//        breath(50, 50, 50,50);
+//      breath(100, 100, 100,100);
+//      breath(150, 150, 150,250);
+      breath(200, 200, 200,2500);}
 
 
 //      newStar();
@@ -333,7 +333,7 @@ String processingSms()
         Serial.println("Storing phone number");
 
         hasSmsToSend = true;
-        //sendThankYouMessage(mySms,ThankYouMessage);
+        sendThankYouMessage(mySms,ThankYouMessage);
         }
       else if ((mySmsNumber.substring(0,4) == "+336" || mySmsNumber.substring(0,4) == "+337") && !isAnimating )
         {
@@ -762,4 +762,3 @@ void show() {
   taken by any interrupts + the time in our pixel generation code never exceeded the reset time (5us).
   
 */
-
